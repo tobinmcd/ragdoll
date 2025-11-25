@@ -6,6 +6,7 @@ export class Game extends Phaser.Scene {
     msg_text: Phaser.GameObjects.Text;
     ballA: Phaser.Physics.Matter.Image;
     ballB: Phaser.Physics.Matter.Image;
+    ended = false;
 
     constructor() {
         super("Game");
@@ -17,6 +18,8 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
+        this.ended = false;
+
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
 
@@ -58,17 +61,52 @@ export class Game extends Phaser.Scene {
 
         this.msg_text = this.add.text(
             512,
-            700,
-            "Drag the balls with your mouse.",
+            40,
+            "Drag the balls and don't let them hit the right wall.",
             {
                 fontFamily: "Arial Black",
-                fontSize: 32,
+                fontSize: 28,
                 color: "#ffffff",
                 stroke: "#000000",
                 strokeThickness: 8,
                 align: "center",
             }
         );
-        this.msg_text.setOrigin(0.5);
+        this.msg_text.setOrigin(0.5, 0);
+
+        this.setupCollisionHandlers();
+    }
+
+    private setupCollisionHandlers() {
+        this.matter.world.on(
+            "collisionstart",
+            (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
+                if (this.ended) {
+                    return;
+                }
+
+                const rightWall = this.matter.world.walls?.right;
+
+                if (!rightWall) {
+                    return;
+                }
+
+                for (const pair of event.pairs) {
+                    const { bodyA, bodyB } = pair;
+
+                    const hitsRightWall =
+                        (bodyA === rightWall &&
+                            (bodyB === this.ballA.body || bodyB === this.ballB.body)) ||
+                        (bodyB === rightWall &&
+                            (bodyA === this.ballA.body || bodyA === this.ballB.body));
+
+                    if (hitsRightWall) {
+                        this.ended = true;
+                        this.scene.start("GameOver");
+                        break;
+                    }
+                }
+            }
+        );
     }
 }
