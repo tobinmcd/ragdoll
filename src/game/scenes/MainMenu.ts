@@ -15,7 +15,7 @@ export class MainMenu extends Scene {
         this.logo = this.add.image(512, 300, "logo");
 
         this.title = this.add
-            .text(512, 460, "Tobin's Ragdoll Simulator\n\nClick to Start", {
+            .text(512, 460, "\nTobin's Ragdoll Simulator\n\nClick to Start", {
                 fontFamily: "Arial Black",
                 fontSize: 38,
                 color: "#ffffff",
